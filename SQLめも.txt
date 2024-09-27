@@ -1,0 +1,6 @@
+delete from rapdic.rapdic where id not in (select min_id from (select MIN(id) min_id from rapdic.rapdic group by word, w1,w2,w3,w4,w5,w6,w7, hurigana1,hurigana2)tmp);
+
+set @n:=0;
+update 'rapdic.rapdic' set id=@n:=@n+1;
+
+http://127.0.0.1:5000

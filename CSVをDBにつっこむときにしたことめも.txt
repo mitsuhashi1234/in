@@ -1,0 +1,320 @@
+サーバ側とクライアント側
+クライアント側（MySQL環境内）：select @@local_infile;
+set persist local_infile=1;（（ローカル韻ファイル許可フラグ）
+select @@local_infile;
+
+↓だったかも
+mysql --local-infile=1 -u root -p1
+
+サーバー側（コマンドプロンプト）：
+コマンドプロンプトでmysql使えるようにするためにパス通す必要があった
+mysql -u root -p --enable-local-infile
+たぶんこんなんやった
+
+んでMySQL実行したら文字コードエラーやらいろいろでた。
+ファイルのパスは\じゃなくて/でやるべきらしい
+
+
+
+Microsoft Windows [Version 10.0.19045.4412]
+(c) Microsoft Corporation. All rights reserved.
+
+C:\Users\User>mysql
+ERROR 1045 (28000): Access denied for user 'ODBC'@'localhost' (using password: NO)
+
+C:\Users\User>mysql --version
+mysql  Ver 8.0.36 for Win64 on x86_64 (MySQL Community Server - GPL)
+
+C:\Users\User>mysql --local_infile=1 -u root -ppassword DB_name
+mysql: [Warning] Using a password on the command line interface can be insecure.
+ERROR 1049 (42000): Unknown database 'db_name'
+
+C:\Users\User>mysql --local-infile=1 -u root -p1
+mysql: [Warning] Using a password on the command line interface can be insecure.
+ERROR 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+
+C:\Users\User>mysql
+ERROR 1045 (28000): Access denied for user 'ODBC'@'localhost' (using password: NO)
+
+C:\Users\User>mysql -u root -p
+Enter password: ********
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 40
+Server version: 8.0.36 MySQL Community Server - GPL
+
+Copyright (c) 2000, 2024, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> quit
+Bye
+
+C:\Users\User>mysql --local-infile=1 -u root -p1
+mysql: [Warning] Using a password on the command line interface can be insecure.
+ERROR 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+
+C:\Users\User>mysql --local_infile=1 -u root -ppassword rapdic
+mysql: [Warning] Using a password on the command line interface can be insecure.
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 42
+Server version: 8.0.36 MySQL Community Server - GPL
+
+Copyright (c) 2000, 2024, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql>  load data local infile 'C:\Users\User\Downloads\output1.csv' into table rapdic.rapdic;
+ERROR 2 (HY000): File 'C:UsersUserDownloadsoutput1.csv' not found (OS errno 2 - No such file or directory)
+mysql> load data local infile 'C:/Users/Users/Downloads/output1.csv' into table rapdic.rapdic;
+ERROR 2 (HY000): File 'C:\Users\Users\Downloads\output1.csv' not found (OS errno 2 - No such file or directory)
+mysql> load data local infile 'output1.csv' into table rapdic.rapdic;
+ERROR 2 (HY000): File 'output1.csv' not found (OS errno 2 - No such file or directory)
+mysql> ls
+    -> ;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'ls' at line 1
+mysql> load data local infile 'C:\Program Files\MySQL\MySQL Server 8.0\bin\output1.csv' into table rapdic.rapdic;
+ERROR 2 (HY000): File 'C:Program FilesMySQLMySQL Server 8.inoutput1.csv' not found (OS errno 2 - No such file or directory)
+mysql> ls -l
+    -> ;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'ls -l' at line 1
+mysql> quit
+Bye
+
+C:\Users\User>ls -l
+'ls' は、内部コマンドまたは外部コマンド、
+操作可能なプログラムまたはバッチ ファイルとして認識されていません。
+
+C:\Users\User>sudo su mysql
+'sudo' は、内部コマンドまたは外部コマンド、
+操作可能なプログラムまたはバッチ ファイルとして認識されていません。
+
+C:\Users\User>mysql
+ERROR 1045 (28000): Access denied for user 'ODBC'@'localhost' (using password: NO)
+
+C:\Users\User>mysql --local_infile=1 -u root -ppassword rapdic
+mysql: [Warning] Using a password on the command line interface can be insecure.
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 44
+Server version: 8.0.36 MySQL Community Server - GPL
+
+Copyright (c) 2000, 2024, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> LOAD DATA LOCAL INFILE 'C:/Program Files/MySQL/MySQL Server 8.0/Data/output1.csv' into table rapdic.rapdic;
+ERROR 1300 (HY000): Invalid utf8mb4 character string: '1,'
+mysql>  LOAD DATA LOCAL INFILE 'C:/Program Files/MySQL/MySQL Server 8.0/Data/output.csv' into table rapdic.rapdic;
+ERROR 1300 (HY000): Invalid utf8mb4 character string: '1,'
+mysql> show variables like 'character\_set\_%';
++--------------------------+---------+
+| Variable_name            | Value   |
++--------------------------+---------+
+| character_set_client     | cp932   |
+| character_set_connection | cp932   |
+| character_set_database   | utf8mb4 |
+| character_set_filesystem | binary  |
+| character_set_results    | cp932   |
+| character_set_server     | utf8mb4 |
+| character_set_system     | utf8mb3 |
++--------------------------+---------+
+7 rows in set, 1 warning (0.09 sec)
+
+mysql> LOAD DATA LOCAL INFILE 'C:/Program Files/MySQL/MySQL Server 8.0/Data/output.csv' into table rapdic.rapdic;
+Query OK, 611 rows affected, 6721 warnings (0.08 sec)
+Records: 611  Deleted: 0  Skipped: 0  Warnings: 6721
+
+mysql> select * from rapdic.rapdic limit 30;
++----+------+------+------+------+------+------+------+------+-----------+-----------+
+| id | word | w1   | w2   | w3   | w4   | w5   | w6   | w7   | hurigana1 | hurigana2 |
++----+------+------+------+------+------+------+------+------+-----------+-----------+
+|  1 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+|  2 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+|  3 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+|  4 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+|  5 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+|  6 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+|  7 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+|  8 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+|  9 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+| 10 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+| 11 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+| 12 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+| 13 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+| 14 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+| 15 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+| 16 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+| 17 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+| 18 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+| 19 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+| 20 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+| 21 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+| 22 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+| 23 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+| 24 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+| 25 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+| 26 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+| 27 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+| 28 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+| 29 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+| 30 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
++----+------+------+------+------+------+------+------+------+-----------+-----------+
+30 rows in set (0.03 sec)
+
+mysql> load data infile 'C:Program Files/MySQL/MySQL Server 8.0/Data/output.csv' into table rapdic.rapdic;
+ERROR 1290 (HY000): The MySQL server is running with the --secure-file-priv option so it cannot execute this statement
+mysql> quit
+Bye
+
+C:\Users\User>mysql --local_infile=1 -u root -ppassword rapdic
+mysql: [Warning] Using a password on the command line interface can be insecure.
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 45
+Server version: 8.0.36 MySQL Community Server - GPL
+
+Copyright (c) 2000, 2024, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> load data infile 'C:Program Files/MySQL/MySQL Server 8.0/Data/output.csv' into table rapdic.rapdic;
+ERROR 1290 (HY000): The MySQL server is running with the --secure-file-priv option so it cannot execute this statement
+mysql> LOAD DATA LOCAL INFILE 'C:/Program Files/MySQL/MySQL Server 8.0/Data/output.csv' into table rapdic.rapdic;
+ERROR 1300 (HY000): Invalid utf8mb4 character string: '1,'
+mysql> quit
+Bye
+
+C:\Users\User>mysql --local-infile=1 -u root -p
+Enter password: ********
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 46
+Server version: 8.0.36 MySQL Community Server - GPL
+
+Copyright (c) 2000, 2024, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> LOAD DATA LOCAL INFILE 'C:/Program Files/MySQL/MySQL Server 8.0/Data/output.csv' into table rapdic.rapdic;
+ERROR 1300 (HY000): Invalid utf8mb4 character string: '1,'
+mysql> SHOW VARIABLES LIKE 'char%';
++--------------------------+---------------------------------------------------------+
+| Variable_name            | Value                                                   |
++--------------------------+---------------------------------------------------------+
+| character_set_client     | cp932                                                   |
+| character_set_connection | cp932                                                   |
+| character_set_database   | utf8mb4                                                 |
+| character_set_filesystem | binary                                                  |
+| character_set_results    | cp932                                                   |
+| character_set_server     | utf8mb4                                                 |
+| character_set_system     | utf8mb3                                                 |
+| character_sets_dir       | C:\Program Files\MySQL\MySQL Server 8.0\share\charsets\ |
++--------------------------+---------------------------------------------------------+
+8 rows in set, 1 warning (0.05 sec)
+
+mysql>  LOAD DATA LOCAL INFILE 'C:/Program Files/MySQL/MySQL Server 8.0/Data/output.csv' into table rapdic.rapdic;
+ERROR 1300 (HY000): Invalid utf8mb4 character string: '1,'
+mysql> quit
+Bye
+
+C:\Users\User>mysql --local-infile=1 -u root -p
+Enter password: ********
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 47
+Server version: 8.0.36 MySQL Community Server - GPL
+
+Copyright (c) 2000, 2024, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql>   LOAD DATA LOCAL INFILE 'C:/Program Files/MySQL/MySQL Server 8.0/Data/output.csv' into table rapdic.rapdic;
+ERROR 1300 (HY000): Invalid utf8mb4 character string: '1,'
+mysql>
+mysql> mysql>   LOAD DATA LOCAL INFILE 'C:/Program Files/MySQL/MySQL Server 8.0/Data/output.csv' into table rapdic.rapdic;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'mysql>   LOAD DATA LOCAL INFILE 'C:/Program Files/MySQL/MySQL Server 8.0/Data/ou' at line 1
+mysql> LOAD DATA LOCAL INFILE 'C:/Program Files/MySQL/MySQL Server 8.0/Data/output.csv' into table rapdic.rapdic;
+ERROR 1300 (HY000): Invalid utf8mb4 character string: '1,'
+mysql> LOAD DATA LOCAL INFILE 'C:/Program Files/MySQL/MySQL Server 8.0/Data/output.csv' into table rapdic.rapdic;
+ERROR 1300 (HY000): Invalid utf8mb4 character string: '1,'
+mysql> LOAD DATA LOCAL INFILE 'C:/Program Files/MySQL/MySQL Server 8.0/Data/output3.csv' into table rapdic.rapdic;
+Query OK, 4 rows affected, 44 warnings (0.10 sec)
+Records: 4  Deleted: 0  Skipped: 0  Warnings: 44
+
+mysql> select * from rapdic.rapdic;
++----+------+------+------+------+------+------+------+------+-----------+-----------+
+| id | word | w1   | w2   | w3   | w4   | w5   | w6   | w7   | hurigana1 | hurigana2 |
++----+------+------+------+------+------+------+------+------+-----------+-----------+
+|  1 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+|  2 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+|  3 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+|  4 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
++----+------+------+------+------+------+------+------+------+-----------+-----------+
+4 rows in set (0.04 sec)
+
+mysql> LOAD DATA LOCAL INFILE 'C:/Program Files/MySQL/MySQL Server 8.0/Data/output4.csv' into table rapdic.rapdic;
+Query OK, 1 row affected, 23 warnings (0.04 sec)
+Records: 2  Deleted: 0  Skipped: 1  Warnings: 23
+
+mysql> select * from rapdic.rapdic;
++-----+------+------+------+------+------+------+------+------+-----------+-----------+
+| id  | word | w1   | w2   | w3   | w4   | w5   | w6   | w7   | hurigana1 | hurigana2 |
++-----+------+------+------+------+------+------+------+------+-----------+-----------+
+|   1 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+|   2 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+|   3 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+|   4 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+| 612 |      | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
++-----+------+------+------+------+------+------+------+------+-----------+-----------+
+5 rows in set (0.00 sec)
+
+mysql> LOAD DATA LOCAL INFILE 'C:/Program Files/MySQL/MySQL Server 8.0/Data/output4.csv' into table rapdic.rapdic fields terminated by ',' enclosed by '"';
+Query OK, 1 row affected, 2 warnings (0.04 sec)
+Records: 2  Deleted: 0  Skipped: 1  Warnings: 2
+
+mysql> select * from rapdic.rapdic;
++-----+------+------+--------+------+------+------+------+------+-----------+-----------+
+| id  | word | w1   | w2     | w3   | w4   | w5   | w6   | w7   | hurigana1 | hurigana2 |
++-----+------+------+--------+------+------+------+------+------+-----------+-----------+
+|   1 |      | NULL | NULL   | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+|   2 |      | NULL | NULL   | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+|   3 |      | NULL | NULL   | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+|   4 |      | NULL | NULL   | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+| 612 |      | NULL | NULL   | NULL | NULL | NULL | NULL | NULL | NULL      | NULL      |
+     || 俺   | 名詞 | 代名詞 | 一般 | *    | *    | *    | 俺   | オレ      | オレ
++-----+------+------+--------+------+------+------+------+------+-----------+-----------+
+6 rows in set (0.03 sec)
+
+mysql> delete from rapdic.rapdic;
+Query OK, 6 rows affected (0.02 sec)
+
+mysql> LOAD DATA LOCAL INFILE 'C:/Program Files/MySQL/MySQL Server 8.0/Data/output1.csv' into table rapdic.rapdic fields terminated by ',' enclosed by '"';
+Query OK, 610 rows affected, 1 warning (0.06 sec)
+Records: 610  Deleted: 0  Skipped: 0  Warnings: 1
+
+mysql> select * from rapdic.rapdic;
+
+
+mysql>
+
+LOAD DATA LOCAL INFILE 'C:/Program Files/MySQL/MySQL Server 8.0/Data/rapdic_kairyou.csv' into table rapdic.rapdic_main fields terminated by ',' enclosed by '"';
